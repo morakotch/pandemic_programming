@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HPQ Before/After – QA Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0e1117;
+      --card: #171c24;
+      --text: #e6e9ef;
+      --muted: #9aa7bd;
+      --accent: #4fd1c5;
+      --accent-2: #f59e0b;
+      --danger: #f87171;
+      --grid: rgba(255, 255, 255, 0.05);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(79, 209, 197, 0.08), transparent 30%),
+                  radial-gradient(circle at 80% 10%, rgba(245, 158, 11, 0.08), transparent 28%),
+                  radial-gradient(circle at 60% 70%, rgba(255,255,255,0.05), transparent 35%),
+                  var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 24px 48px;
+    }
+    header {
+      max-width: 1100px;
+      margin: 0 auto 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px 16px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -0.4px;
+    }
+    header .meta {
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 18px 18px 14px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+    }
+    .card h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      color: var(--muted);
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+    }
+    .stat-big {
+      font-size: 26px;
+      font-weight: 600;
+      margin: 0 0 6px;
+      color: var(--accent);
+    }
+    .stat-sub {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+      line-height: 1.4;
+    }
+    canvas {
+      width: 100% !important;
+      height: 320px !important;
+    }
+    ul.test-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 10px;
+    }
+    ul.test-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      background: rgba(255,255,255,0.02);
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .label {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .value {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      max-width: 1100px;
+      margin: 16px auto 0;
+    }
+    .footnote {
+      max-width: 1100px;
+      margin: 20px auto 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    @media (max-width: 720px) {
+      body { padding: 20px 16px 36px; }
+      canvas { height: 260px !important; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>HPQ Before/After — QA role</h1>
+    <div class="meta pill" id="meta-role"></div>
+    <div class="meta pill" id="meta-count"></div>
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Summary</h3>
+      <div class="stat-big" id="stat-diff-mean">–</div>
+      <p class="stat-sub" id="stat-diff-ci">Bootstrap CI …</p>
+      <p class="stat-sub" id="stat-diff-extra"></p>
+    </div>
+
+    <div class="card">
+      <h3>Tests</h3>
+      <ul class="test-list" id="tests"></ul>
+    </div>
+
+    <div class="card">
+      <h3>Distributions (summary)</h3>
+      <p class="stat-sub" id="summary-before"></p>
+      <p class="stat-sub" id="summary-after"></p>
+      <p class="stat-sub" id="summary-diff"></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h3>Individual changes (slope chart)</h3>
+      <canvas id="chart-slope"></canvas>
+    </div>
+    <div class="card">
+      <h3>Difference distribution (histogram)</h3>
+      <canvas id="chart-hist"></canvas>
+    </div>
+    <div class="card">
+      <h3>WHO Before/After by Age</h3>
+      <p class="stat-sub">Boxplot grouped by Age (generated from the Python script).</p>
+      <img id="who-boxplot-img" alt="WHO Before/After boxplot by Age" style="width:100%;border-radius:10px;border:1px solid rgba(255,255,255,0.06);" />
+    </div>
+  </div>
+
+  <div class="footnote" id="footnote"></div>
+
+  <script>
+    const fmt = (n, digits=2) => Number.isFinite(n) ? n.toFixed(digits) : '–';
+    const signLabel = p => (p === null || Number.isNaN(p)) ? 'p: N/A' : `p = ${fmt(p, 4)}`;
+
+    async function loadData() {
+      const res = await fetch('hpq_qa_data.json');
+      if (!res.ok) throw new Error('Cannot load hpq_qa_data.json');
+      const data = await res.json();
+      render(data);
+    }
+
+    function summarize(stats) {
+      return `mean ${fmt(stats.mean)} | sd ${fmt(stats.sd)} | median ${fmt(stats.median)} | range ${fmt(stats.min,0)} – ${fmt(stats.max,0)}`;
+    }
+
+    function slopeChart(ctx, ids, before, after) {
+      const labels = ids.map((id, idx) => `#${id ?? idx + 1}`);
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Before',
+              data: before,
+              borderColor: '#4fd1c5',
+              backgroundColor: 'rgba(79, 209, 197, 0.1)',
+              tension: 0.25,
+              pointRadius: 3.5,
+              borderWidth: 2,
+            },
+            {
+              label: 'After',
+              data: after,
+              borderColor: '#f59e0b',
+              backgroundColor: 'rgba(245, 158, 11, 0.12)',
+              tension: 0.25,
+              pointRadius: 3.5,
+              borderWidth: 2,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { labels: { color: '#e6e9ef' } },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.dataset.label}: ${fmt(ctx.parsed.y, 2)}`
+              }
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#9aa7bd' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#9aa7bd' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+          }
+        }
+      });
+    }
+
+    function histogram(values, binWidth = 2) {
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const start = Math.floor(min / binWidth) * binWidth;
+      const end = Math.ceil(max / binWidth) * binWidth;
+      const bins = [];
+      for (let b = start; b <= end; b += binWidth) {
+        bins.push({ label: `${b} to ${b + binWidth}`, start: b, end: b + binWidth, count: 0 });
+      }
+      values.forEach(v => {
+        const idx = Math.min(Math.floor((v - start) / binWidth), bins.length - 1);
+        bins[idx].count += 1;
+      });
+      return bins;
+    }
+
+    function histChart(ctx, diffs) {
+      const bins = histogram(diffs, 2);
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: bins.map(b => b.label),
+          datasets: [{
+            label: 'After - Before',
+            data: bins.map(b => b.count),
+            backgroundColor: bins.map(b => b.start < 0 ? 'rgba(248, 113, 113, 0.7)' : 'rgba(79, 209, 197, 0.7)'),
+            borderRadius: 6
+          }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#9aa7bd' }, grid: { color: 'rgba(255,255,255,0.04)' } },
+            y: { ticks: { color: '#9aa7bd', precision: 0 }, grid: { color: 'rgba(255,255,255,0.04)' } }
+          }
+        }
+      });
+    }
+
+    function render(data) {
+      document.getElementById('meta-role').textContent = data.role;
+      document.getElementById('meta-count').textContent = `${data.n} respondents`;
+
+      document.getElementById('stat-diff-mean').textContent = `Δ (After - Before): ${fmt(data.stats.diff.mean, 3)}`;
+      const ci = data.bootstrap_ci?.mean_diff;
+      document.getElementById('stat-diff-ci').textContent = ci ? `Bootstrap 95% CI: ${fmt(ci.lower, 3)} to ${fmt(ci.upper, 3)}` : 'Bootstrap CI unavailable';
+      document.getElementById('stat-diff-extra').textContent = `Before mean ${fmt(data.stats.before.mean)} → After mean ${fmt(data.stats.after.mean)} (n = ${data.n})`;
+
+      document.getElementById('summary-before').textContent = `Before: ${summarize(data.stats.before)}`;
+      document.getElementById('summary-after').textContent = `After: ${summarize(data.stats.after)}`;
+      document.getElementById('summary-diff').textContent = `Difference: ${summarize(data.stats.diff)}`;
+
+      const testsEl = document.getElementById('tests');
+      const tests = [
+        { label: 'Wilcoxon signed-rank', value: `W = ${fmt(data.tests.wilcoxon.w, 3)}; ${signLabel(data.tests.wilcoxon.p)}` },
+        { label: 'Sign test', value: `p ≈ ${fmt(data.tests.sign.p, 4)} (pos ${data.tests.sign.n_pos}, neg ${data.tests.sign.n_neg})` },
+        { label: 'Paired t-test', value: `t = ${fmt(data.tests.paired_t.t, 3)}; ${signLabel(data.tests.paired_t.p)}` },
+      ];
+      testsEl.innerHTML = tests.map(t => `<li><span class="label">${t.label}</span><span class="value">${t.value}</span></li>`).join('');
+
+      const ids = data.data.map(r => r.id);
+      const before = data.data.map(r => r.before);
+      const after = data.data.map(r => r.after);
+      const diff = data.data.map(r => r.diff);
+
+      slopeChart(document.getElementById('chart-slope'), ids, before, after);
+      histChart(document.getElementById('chart-hist'), diff);
+
+      const note = data.exclude_negative_after
+        ? 'Rows with HPQ_After < 0 were excluded.'
+        : 'Rows with HPQ_After < 0 were kept.';
+      document.getElementById('footnote').textContent =
+        `${note} Source: ${data.source_file}. This page reads stats from docs/hpq_qa_data.json (generated by data/analyze_hpq_qas.py).`;
+
+      const img = document.getElementById('who-boxplot-img');
+      img.src = 'who_boxplot.png';
+      img.onerror = () => {
+        img.style.display = 'none';
+      };
+    }
+
+    loadData().catch(err => {
+      document.body.innerHTML = '<p style="color: #f87171; font-family: Space Grotesk, sans-serif; max-width: 760px; margin: 40px auto;">Failed to load hpq_qa_data.json. Run the Python export first: <code>.venv_codex/bin/python data/analyze_hpq_qas.py --export-json docs/hpq_qa_data.json</code></p>';
+      console.error(err);
+    });
+  </script>
+</body>
+</html>

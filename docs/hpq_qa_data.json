@@ -1,0 +1,147 @@
+{
+  "role": "Quality Assurance Specialist, Software Testers",
+  "n": 15,
+  "exclude_negative_after": false,
+  "stats": {
+    "before": {
+      "n": 15,
+      "mean": 13.0,
+      "sd": 4.035556254807296,
+      "median": 13.0,
+      "min": 6.0,
+      "max": 19.0
+    },
+    "after": {
+      "n": 15,
+      "mean": 9.066666666666666,
+      "sd": 5.2842983946603095,
+      "median": 10.0,
+      "min": -3.0,
+      "max": 15.0
+    },
+    "diff": {
+      "n": 15,
+      "mean": -3.933333333333333,
+      "sd": 6.238894896038041,
+      "median": -2.0,
+      "min": -22.0,
+      "max": 2.0
+    }
+  },
+  "tests": {
+    "sign": {
+      "n_pos": 2,
+      "n_neg": 11,
+      "n_nonzero": 13,
+      "p": 0.0224609375
+    },
+    "paired_t": {
+      "t": -2.4417360364183347,
+      "p": null
+    },
+    "wilcoxon": {
+      "w": 6.0,
+      "p": 0.005771589044103543
+    }
+  },
+  "bootstrap_ci": {
+    "mean_diff": {
+      "lower": -7.333333333333333,
+      "upper": -1.3333333333333333
+    },
+    "samples": 20000
+  },
+  "data": [
+    {
+      "id": 51,
+      "before": 13.0,
+      "after": 10.0,
+      "diff": -3.0
+    },
+    {
+      "id": 65,
+      "before": 6.0,
+      "after": 6.0,
+      "diff": 0.0
+    },
+    {
+      "id": 68,
+      "before": 12.0,
+      "after": 10.0,
+      "diff": -2.0
+    },
+    {
+      "id": 110,
+      "before": 12.0,
+      "after": 14.0,
+      "diff": 2.0
+    },
+    {
+      "id": 131,
+      "before": 14.0,
+      "after": 0.0,
+      "diff": -14.0
+    },
+    {
+      "id": 190,
+      "before": 17.0,
+      "after": 14.0,
+      "diff": -3.0
+    },
+    {
+      "id": 192,
+      "before": 9.0,
+      "after": 10.0,
+      "diff": 1.0
+    },
+    {
+      "id": 193,
+      "before": 12.0,
+      "after": 8.0,
+      "diff": -4.0
+    },
+    {
+      "id": 200,
+      "before": 18.0,
+      "after": 15.0,
+      "diff": -3.0
+    },
+    {
+      "id": 213,
+      "before": 18.0,
+      "after": 12.0,
+      "diff": -6.0
+    },
+    {
+      "id": 214,
+      "before": 13.0,
+      "after": 11.0,
+      "diff": -2.0
+    },
+    {
+      "id": 231,
+      "before": 11.0,
+      "after": 11.0,
+      "diff": 0.0
+    },
+    {
+      "id": 234,
+      "before": 6.0,
+      "after": 4.0,
+      "diff": -2.0
+    },
+    {
+      "id": 245,
+      "before": 19.0,
+      "after": -3.0,
+      "diff": -22.0
+    },
+    {
+      "id": 249,
+      "before": 15.0,
+      "after": 14.0,
+      "diff": -1.0
+    }
+  ],
+  "source_file": "data/covid_data_12June2023_after_remove_consent for chatgpt.xlsx"
+}
